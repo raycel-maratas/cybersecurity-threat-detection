@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    admin BOOLEAN DEFAULT FALSE
+);
+
+CREATE TABLE IF NOT EXISTS logs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    filename TEXT NOT NULL,
+    content TEXT,
+    timestamp_uploaded DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS alerts (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    log_id INTEGER,
+    type TEXT,
+    description TEXT,
+    timestamp_detected DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (log_id) REFERENCES logs(id)
+);
+
+CREATE TABLE IF NOT EXISTS threat_hashes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    hash_value TEXT UNIQUE NOT NULL,
+    threat_level TEXT
+);
