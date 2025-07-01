@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, request, jsonify
 
-from app.models import db, Log, Alert
+from app.models import db, Log, Alert, User
 from app.parser import parse_log_file
 from app.hash_utils import KNOWN_BAD_HASHES
 from app.anomaly_utils import is_anomaly
@@ -117,12 +117,12 @@ def check_user():
     data = request.get_json()
     username = data.get('username', '').strip()
 
-    # Load known usernames from the database
+    # load known usernames from the database
     known_users = [user.username.lower() for user in User.query.all()]
 
     if is_anomaly(username, known_users):
-        return jsonify({'status': 'anomaly', 'message': f'⚠️ Anomalous user: {username}'}), 200
+        return jsonify({'status': 'anomaly', 'message': f'️ Anomalous user: {username}'}), 200
 
-    return jsonify({'status': 'normal', 'message': f'✅ Known user: {username}'}), 200
+    return jsonify({'status': 'normal', 'message': f' Known user: {username}'}), 200
 
 
