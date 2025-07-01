@@ -117,7 +117,7 @@ def check_user():
     data = request.get_json()
     username = data.get('username', '').strip()
 
-    # load known usernames from the database
+    #load known usernames from the database
     known_users = [user.username.lower() for user in User.query.all()]
 
     if is_anomaly(username, known_users):

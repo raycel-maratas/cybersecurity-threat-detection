@@ -30,10 +30,12 @@ def create_app():
     from app.routes import log_bp
     from app.admin import admin_bp
     from app.user import user_bp
+    from app.correlation import correlation_bp
 
     app.register_blueprint(log_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(user_bp, url_prefix='/user')
+    app.register_blueprint(correlation_bp)
 
     app.cli.add_command(init_db)
     app.cli.add_command(list_users)

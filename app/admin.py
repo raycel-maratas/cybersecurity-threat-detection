@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify, session
 from functools import wraps
-from app.models import db, User
+from app.models import db, User, Log
 from app.hash_utils import hash_password, verify_password
 
 admin_bp = Blueprint('admin', __name__)
@@ -40,11 +40,17 @@ def logout():
     session.clear()
     return jsonify({"message": "Logged out"})
 
+
 @admin_bp.route('/logs', methods=['GET'])
 @login_required
 def logs():
-    return jsonify({"logs": [
-        "[INFO] Login userID_01",
-        "[WARN] Anomaly userID_12",
-        "[ALERT] Unauthorized login userID_99"
-    ]})
+    logs = Log.query.order_by(Log.timestamp_uploaded.desc()).all()
+    return jsonify({
+        "logs": [{
+            "filename": log.filename,
+            "timestamp": log.timestamp_uploaded.isoformat(),
+            "uploader": log.uploaded_by,
+            "content": log.content
+        } for log in logs]
+    })
+
