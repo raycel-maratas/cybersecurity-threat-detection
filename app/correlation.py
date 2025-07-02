@@ -9,7 +9,12 @@ correlation_bp = Blueprint('correlation', __name__)
 def correlate_threats():
     suspicious_alerts = []
 
-    anomalies = Alert.query.filter(Alert.type == "Anomalous Username").all()
+    time_threshold = datetime.utcnow() - timedelta(minutes=15)
+
+    anomalies = Alert.query.filter(
+        Alert.type == "Anomalous Username",
+        Alert.timestamp_detected >= time_threshold
+    ).all()
 
     for anomaly in anomalies:
         match = re.search(r"IP ([\d\.]+)", anomaly.description)
@@ -37,9 +42,3 @@ def correlate_threats():
             })
 
     return jsonify(suspicious_alerts)
-
-time_threshold = datetime.utcnow() - timedelta(minutes=15)
-anomalies = Alert.query.filter(
-    Alert.type == "Anomalous Username",
-    Alert.timestamp_detected >= time_threshold
-).all()

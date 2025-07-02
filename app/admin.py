@@ -21,6 +21,7 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+# router for admin/user login
 @admin_bp.route('/login', methods=['POST'])
 def login():
     data = request.json
@@ -40,7 +41,7 @@ def logout():
     session.clear()
     return jsonify({"message": "Logged out"})
 
-
+# route to retrieve all uploaded logs, protected by login
 @admin_bp.route('/logs', methods=['GET'])
 @login_required
 def logs():
