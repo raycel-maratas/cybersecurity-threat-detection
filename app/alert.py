@@ -1,4 +1,4 @@
-from alert_rules import ALERT_RULES
+from app.alert_rules import ALERT_RULES
 
 def evaluate(match):
 
