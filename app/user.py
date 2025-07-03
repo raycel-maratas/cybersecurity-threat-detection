@@ -113,13 +113,13 @@ def login():
     session['role'] = user.role
 
     user.failed_attempts = 0
-    db.session.commit()
+    db.session.commit()  # ✅ Make sure all alerts and reset are saved
 
     print(f"Login successful for {username}")
     return jsonify({
         "message": "Login successful",
         "role": user.role,
-        "redirect": "/admin-dashboard" if user.role == "admin" else "/user-page"
+        "redirect": "/admin-dashboard" if user.role == "admin" else "/"
     }), 200
 
 

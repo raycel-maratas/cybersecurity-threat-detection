@@ -58,6 +58,10 @@ def seed_users():
         {"username": "DianaTaurasi", "password": "diana938"},
         {"username": "JonSnow", "password": "snow013"},
         {"username": "JuanCruz", "password": "crus938juan"},
+        {"username": "GabbyWilliams", "password": "gab9372"},
+        {"username": "PaigeBueckers", "password": "paigeb5"},
+        {"username": "JujuWatkins", "password": "jujubballin"},
+        {"username": "AndiAgosti", "password": "andi2873"},
     ]
 
     for u in users:

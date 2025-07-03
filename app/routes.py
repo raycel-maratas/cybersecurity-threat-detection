@@ -49,6 +49,8 @@ def home():
             Alert.description.ilike(f"%{current_user.username}%")
         ).all()
 
+        from app.models import FailedLoginAttempt
+
         # Combine all alerts
         all_user_alerts = user_alerts + login_alerts
 
@@ -59,7 +61,12 @@ def home():
         for alert in login_alerts:
             users[alert.id] = current_user.username
 
-        return render_template('user.html', alerts=all_user_alerts, users=users)
+        # Get failed login attempts for this user
+        failed_logins = FailedLoginAttempt.query.filter_by(username=current_user.username).order_by(
+            FailedLoginAttempt.timestamp.desc()).all()
+
+        return render_template('user.html', alerts=all_user_alerts, users=users, failed_logins=failed_logins)
+
 
 @log_bp.route('/login-page')
 def login_page():
