@@ -7,7 +7,7 @@ CyberTrack is a Flask-based cybersecurity threat detection system that processes
 ## Features
 
 * Role-based access for Admin and Users
-* Log upload and parsing (CSV format)
+* Log upload and parsing
 * Hash-based malware detection
 * Binary search anomaly detection
 * Alert generation and database logging
