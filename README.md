@@ -16,7 +16,7 @@ CyberTrack is a Flask-based cybersecurity threat detection system that processes
 
 ---
 
-## User Accounts
+## Accounts
 
 You must seed users before logging in.
 
