@@ -1,3 +1,0 @@
-2025-07-02 15:00:00,High,johndoe,Attempted upload,79f028e200b833681cf1e74ca43f3015
-2025-07-02 13:00:00,High,janedoe,Attempted upload,b411012297dde88ca42b40ba9b6ce923
-2025-07-02 13:00:00,High,juandelacruz,Attempted login,980feefe2ad55706e03eb8e660153e8a

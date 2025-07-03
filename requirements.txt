@@ -1,2 +1,7 @@
 flask
 flask-sqlalchemy
+werkzeug
+socketio
+flask-migrate
+python-dotenv
+requests
