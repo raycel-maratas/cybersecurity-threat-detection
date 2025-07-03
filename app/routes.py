@@ -7,7 +7,6 @@ from app.hash_utils import is_malware_hash
 from app.anomaly_utils import is_anomaly
 from app.utils import log_action
 from app import socketio
-from flask import current_app
 import traceback
 
 log_bp = Blueprint('log', __name__)
