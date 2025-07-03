@@ -1,21 +1,79 @@
 from datetime import datetime
-from flask import Blueprint, request, jsonify
-
-from app.models import db, Log, Alert, User
+from flask import Blueprint, request, jsonify, render_template, session, redirect, url_for
+from app.models import Log, Alert, User
 from app.parser import parse_log_file
 from app.hash_utils import is_malware_hash
 from app.anomaly_utils import is_anomaly
 from app.utils import log_action
+from app.evaluate import evaluate_threat
+from app.extensions import db
 from app import socketio
 import traceback
 
 log_bp = Blueprint('log', __name__)
 
+# Render the homepage (admin/user dashboard)
 @log_bp.route('/')
-def index():
-    return jsonify({'message': 'Log API endpoint'})
+def home():
+    if 'user_id' not in session:
+        return redirect(url_for('log.login_page'))
 
-# upload and process log file
+    user_id = session['user_id']
+    current_user = User.query.get(user_id)
+
+    if not current_user:
+        session.clear()
+        return redirect(url_for('log.login_page'))
+
+    if current_user.role == 'admin':
+        # Admin sees all logs and alerts
+        alerts = Alert.query.order_by(Alert.timestamp_detected.desc()).all()
+        logs = Log.query.all()
+
+        user_map = {u.id: u.username for u in User.query.all()}
+        users = {log.id: user_map.get(log.uploaded_by, 'Unknown') for log in logs}
+
+        return render_template('admin_dashboard.html', alerts=alerts, users=users)
+    else:
+        # User sees only their logs and alerts
+        user_logs = Log.query.filter_by(uploaded_by=current_user.id).all()
+        log_ids = [log.id for log in user_logs]
+
+        # Alerts linked to their logs
+        user_alerts = Alert.query.filter(Alert.log_id.in_(log_ids)) \
+            .order_by(Alert.timestamp_detected.desc()).all()
+
+        # Alerts from login anomalies (not tied to logs)
+        login_alerts = Alert.query.filter(
+            Alert.log_id == None,
+            Alert.description.ilike(f"%{current_user.username}%")
+        ).all()
+
+        # Combine all alerts
+        all_user_alerts = user_alerts + login_alerts
+
+        # Map alerts to user
+        users = {
+            alert.log_id: current_user.username for alert in user_alerts if alert.log_id is not None
+        }
+        for alert in login_alerts:
+            users[alert.id] = current_user.username
+
+        return render_template('user.html', alerts=all_user_alerts, users=users)
+
+@log_bp.route('/login-page')
+def login_page():
+    return render_template('login.html')
+
+@log_bp.route('/upload-page')
+def upload_page():
+    return render_template('upload.html')
+
+@log_bp.route('/user-page')
+def user_page():
+    return render_template('user.html')
+
+# Upload and process log file
 @log_bp.route('/upload-log', methods=['POST'])
 def upload_log():
     try:
@@ -31,18 +89,24 @@ def upload_log():
                 filename=file.filename,
                 content=log['message'],
                 timestamp_uploaded=datetime.strptime(log['timestamp'], "%Y-%m-%d %H:%M:%S"),
-                uploaded_by=1
+                uploaded_by=session.get('user_id')  # ← Make sure this is dynamic
             )
             db.session.add(new_entry)
             db.session.flush()
 
-            if is_malware_hash(log.get('hash')):
-                alert = Alert(
-                    log_id=new_entry.id,
-                    type="Malware Hash Detected",
-                    description=f"Known malware hash detected: {log['hash']}",
-                    severity="High"
-                )
+            # Evaluate for threats
+            hash_match = is_malware_hash(log.get('hash'))
+            anomaly = is_anomaly(log.get('user', ''), [u.username for u in User.query.all()])
+
+            alert = evaluate_threat(
+                log_id=new_entry.id,
+                username=session.get('username', 'unknown'),
+                ip_address=request.remote_addr or 'unknown',
+                hash_match=hash_match,
+                anomaly=anomaly
+            )
+
+            if alert:
                 db.session.add(alert)
 
             socketio.emit('log_update', {
@@ -53,7 +117,6 @@ def upload_log():
 
         db.session.commit()
         log_action(f"Uploaded file {file.filename}")
-
         return jsonify({'message': 'Logs uploaded and threats checked.'}), 201
 
     except Exception as e:
@@ -61,7 +124,7 @@ def upload_log():
         traceback.print_exc()
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
-# get all logs
+# Get all logs
 @log_bp.route('/logs', methods=['GET'])
 def get_logs():
     sort_by = request.args.get('sort_by', 'timestamp_uploaded')
@@ -72,10 +135,7 @@ def get_logs():
         return jsonify({'error': f'Invalid sort_by field. Must be one of: {valid_sort_fields}'}), 400
 
     sort_attr = getattr(Log, sort_by)
-    if order == 'asc':
-        entries = Log.query.order_by(sort_attr.asc()).all()
-    else:
-        entries = Log.query.order_by(sort_attr.desc()).all()
+    entries = Log.query.order_by(sort_attr.asc() if order == 'asc' else sort_attr.desc()).all()
 
     return jsonify([
         {
@@ -87,7 +147,7 @@ def get_logs():
         } for e in entries
     ])
 
-# get one specific log by id
+# Get a specific log
 @log_bp.route('/log/<int:log_id>', methods=['GET'])
 def get_log(log_id):
     entry = Log.query.get(log_id)
@@ -102,7 +162,7 @@ def get_log(log_id):
         'uploaded_by': entry.uploaded_by
     })
 
-# get all alerts
+# Get all alerts
 @log_bp.route('/alerts', methods=['GET'])
 def get_alerts():
     sort_by = request.args.get('sort_by', 'timestamp_detected')
@@ -126,7 +186,7 @@ def get_alerts():
         } for alert in alerts
     ])
 
-# anomaly detection on username
+# Anomaly detection for username
 @log_bp.route('/check-user', methods=['POST'])
 def check_user():
     data = request.get_json()
@@ -135,6 +195,32 @@ def check_user():
     known_users = [user.username.lower() for user in User.query.all()]
 
     if is_anomaly(username, known_users):
-        return jsonify({'status': 'anomaly', 'message': f'️ Anomalous user: {username}'}), 200
+        return jsonify({'status': 'anomaly', 'message': f'️Anomalous user: {username}'}), 200
 
-    return jsonify({'status': 'normal', 'message': f' Known user: {username}'}), 200
+    return jsonify({'status': 'normal', 'message': f'Known user: {username}'}), 200
+
+# Admin-only dashboard
+@log_bp.route('/admin-dashboard')
+def admin_dashboard():
+    from app.models import Log, Alert, FailedLoginAttempt
+
+    logs = Log.query.order_by(Log.timestamp_uploaded.desc()).all()
+    alerts = Alert.query.order_by(Alert.timestamp_detected.desc()).all()
+    failed_logins = FailedLoginAttempt.query.order_by(FailedLoginAttempt.timestamp.desc()).all()
+
+    users = {
+        log.id: (
+            User.query.get(log.uploaded_by).username
+            if log.uploaded_by and User.query.get(log.uploaded_by)
+            else 'Unknown'
+        )
+        for log in logs
+    }
+
+    return render_template(
+        'admin_dashboard.html',
+        logs=logs,
+        alerts=alerts,
+        failed_logins=failed_logins,
+        users=users
+    )

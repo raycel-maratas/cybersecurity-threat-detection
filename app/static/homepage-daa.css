@@ -1,0 +1,235 @@
+/* Base Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(to bottom, #AC0D8F, #98FAE6);
+  color: #333;
+  line-height: 1.6;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+header {
+  background: #ffffff;
+  color: white;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #f0f0f0;
+}
+
+.logo {
+  width: 60px;
+  height: auto;
+  margin-right: 15px;
+}
+
+.brand-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #990992;
+  font-family: Arial;
+}
+
+/* Layout */
+.container {
+  padding: 40px 60px;
+}
+
+.module {
+  margin-bottom: 50px;
+}
+
+.module h2 {
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  border-left: 5px solid #0077b6;
+  padding-left: 12px;
+  color: #ffffff;
+}
+
+/* Cards */
+.card-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+}
+
+.card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  padding: 20px;
+  flex: 1 1 300px;
+}
+
+.card.wide {
+  flex: 1 1 100%;
+}
+
+/* Log Feed */
+.log-feed {
+  background: #f1f3f7;
+  border-radius: 8px;
+  padding: 10px;
+  max-height: 160px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.log {
+  padding: 5px;
+  margin-bottom: 6px;
+  border-radius: 4px;
+}
+
+.normal {
+  color: #2a9d8f;
+}
+
+.suspicious {
+  color: #f4a261;
+}
+
+.malicious {
+  color: #e63946;
+  font-weight: bold;
+}
+
+/* Inputs & Controls */
+input[type="text"],
+input[type="number"],
+select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+button {
+  background: #0077b6;
+  color: white;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+button:hover {
+  background: #005f99;
+}
+
+.btn-danger {
+  background: #e63946;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-danger:hover {
+  background: #c92c3a;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #e1e1e1;
+  text-align: left;
+}
+
+th {
+  background: #0077b6;
+  color: white;
+  font-weight: 500;
+}
+
+/* Graph Placeholder */
+.graph-placeholder {
+  background: #e0e0e0;
+  height: 150px;
+  border: 2px dashed #aaa;
+  border-radius: 10px;
+  text-align: center;
+  line-height: 150px;
+  font-size: 14px;
+  color: #555;
+}
+
+
+.log {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.red {
+  background-color: red;
+}
+
+.yellow {
+  background-color: yellow;
+}
+
+.green {
+  background-color: green;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #4b004b;
+  color: #fff;
+  font-size: 14px;
+  margin-top: 40px;
+  font-family: Arial;
+}
+
+.header-right {margin-left: auto; }
+
+.logout-button {
+  padding: 8px 16px;
+  background-color: #d9534f;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.logout-button:hover {
+  background-color: #c9302c;
+}

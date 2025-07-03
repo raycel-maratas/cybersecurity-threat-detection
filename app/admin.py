@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, session
+from flask import Blueprint, request, jsonify, session, redirect, url_for
 from functools import wraps
 from app.models import db, User, Log
 from app.hash_utils import hash_password, verify_password
@@ -33,13 +33,24 @@ def login():
         session['user_id'] = user.id
         session['username'] = user.username
         session['role'] = user.role
-        return jsonify({"message": "Login successful"})
+
+        redirect_url = "/admin-dashboard" if user.role == "admin" else "/user-page"
+
+        return jsonify({
+            "message": "Login successful",
+            "role": user.role,
+            "redirect": redirect_url
+        }), 200
+
     return jsonify({"message": "Invalid credentials"}), 401
 
+
+# logout route
 @admin_bp.route('/logout')
+@login_required
 def logout():
     session.clear()
-    return jsonify({"message": "Logged out"})
+    return redirect(url_for('log.login_page'))
 
 # route to retrieve all uploaded logs, protected by login
 @admin_bp.route('/logs', methods=['GET'])

@@ -1,6 +1,6 @@
 import os
 
-from app.__init__ import db
+from app.extensions import db
 from datetime import datetime
 from app.hash_utils import hash_password
 
@@ -18,7 +18,7 @@ class User(db.Model):
         if not cls.query.filter_by(username='admin').first():
             admin = cls(
                 username='admin',
-                password=hash_password(os.getenv("ADMIN_PASSWORD", "admin123")),
+                password=hash_password("admin123"),
                 role='admin'
             )
             db.session.add(admin)

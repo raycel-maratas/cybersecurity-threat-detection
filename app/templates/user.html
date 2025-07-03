@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CyberTrack Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='user.css') }}">
+</head>
+<body>
+
+  <header class="header">
+    <img src="{{ url_for('static', filename='images/CyberTrack.png') }}" alt="CyberTrack Logo" class="logo" onerror="this.style.display='none'"/>
+    <h1 class="brand-name">Cybertrack</h1>
+    <div class="header-right">
+      <button class="logout-button">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="module">
+
+      <!-- Settings Card -->
+      <div class="card">
+        <h3>Settings</h3>
+        <label>Sort Logs By</label>
+        <select>
+          <option>Timestamp</option>
+          <option>User ID</option>
+          <option>IP</option>
+          <option>Action</option>
+        </select>
+      </div>
+
+      <!-- Detection Results Table -->
+      <div class="card wide">
+        <h3>Detection Results</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>User</th>
+              <th>IP</th>
+              <th>Action</th>
+              <th>Threat</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% if alerts %}
+              {% for alert in alerts %}
+                <tr>
+                  <td>{{ alert.timestamp_detected.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                  <td>{{ users.get(alert.log_id, 'Unknown') }}</td>
+                  <td>-</td>
+                  <td>{{ alert.type }}</td>
+                  <td class="{% if alert.severity == 'High' %}malicious{% elif alert.severity == 'Medium' %}suspicious{% else %}normal{% endif %}">
+                    {{ alert.description }}
+                  </td>
+                </tr>
+              {% endfor %}
+            {% else %}
+              <tr><td colspan="5">No alerts found for your account.</td></tr>
+            {% endif %}
+          </tbody>
+        </table>
+      </div>
+
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 CyberTrack — All Rights Reserved</p>
+  </footer>
+
+  <script>
+    const sortDropdown = document.querySelector('select');
+    sortDropdown.addEventListener('change', function () {
+      alert('Sorting logs by: ' + this.value);
+    });
+
+    document.querySelector('.logout-button').addEventListener('click', () => {
+      window.location.href = '/user/logout';
+    });
+  </script>
+
+</body>
+</html>

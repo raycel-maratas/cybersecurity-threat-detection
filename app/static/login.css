@@ -1,0 +1,112 @@
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: linear-gradient(to bottom, #AC0D8F, #98FAE6);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+header {
+  background: #ffffff;
+  color: white;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.header {
+   display: flex;
+  align-items: center;
+  padding: 15px 30px;
+  background-color: #f0f0f0;
+}
+
+.logo {
+  width: 60px;
+  height: auto;
+  margin-right: 15px;
+}
+
+.brand-name {
+  font-size: 24px;
+  font-weight: bold;
+  color: #990992;
+  font-family: Arial;
+}
+
+.login-container {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  font-family: ARIAL;
+  padding: 2rem;
+}
+
+.login-form {
+  background-color: rgba(255, 255, 255, 0.9); /* Slight transparency */
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 400px;
+}
+
+.login-form h2 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.login-form label {
+  display: block;
+  margin-top: 1rem;
+ font-family: Arial;
+  font-weight: bold;
+}
+
+.login-form input {
+  width: 100%;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.login-form button {
+  width: 100%;
+  margin-top: 1.5rem;
+  padding: 0.75rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.login-form button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  text-align: center;
+  margin-top: 0.5rem;
+}
+
+footer {
+  text-align: center;
+  padding: 20px;
+  background: #4b004b;
+  color: #fff;
+  font-size: 14px;
+  margin-top: 40px;
+  font-family: Arial;
+}

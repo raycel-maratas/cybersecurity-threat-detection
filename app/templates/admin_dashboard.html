@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>CyberTrack Admin Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='homepage-daa.css') }}">
+</head>
+<body>
+
+  <header class="header">
+    <img src="{{ url_for('static', filename='images/CyberTrack.png') }}" alt="CyberTrack Logo" class="logo" onerror="this.style.display='none'" />
+    <h1 class="brand-name">Cybertrack</h1>
+    <div class="header-right">
+      <button class="logout-button">Logout</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="module">
+      <h2>Cybersecurity Incident Detection</h2>
+
+      <!-- Optional Debug Info (You can remove after testing) -->
+      <div style="font-size: 14px; color: gray; margin-bottom: 10px;">
+        Logged in as: {{ session.username }} (Role: {{ session.role }})<br>
+        Alerts Count: {{ alerts|length }}<br>
+        User map keys: {{ users.keys()|list }}
+      </div>
+
+      <div class="card-grid">
+
+        <!-- Severity Log Feed -->
+        <div class="card">
+          <h3>Severity</h3>
+          <div class="log-feed">
+            {% if alerts %}
+              {% for alert in alerts[:3] %}
+                <div class="log {% if alert.severity == 'High' %}malicious{% elif alert.severity == 'Medium' %}suspicious{% else %}normal{% endif %}">
+                  <span class="circle {% if alert.severity == 'High' %}red{% elif alert.severity == 'Medium' %}yellow{% else %}green{% endif %}"></span>
+                  [{{ alert.severity }}] {{ alert.type }} — {{ alert.description }}
+                </div>
+              {% endfor %}
+            {% else %}
+              <p>No recent alerts available.</p>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Settings Card -->
+        <div class="card">
+          <h3>Settings</h3>
+          <label>Sort Logs By</label>
+          <select>
+            <option>Timestamp</option>
+            <option>User ID</option>
+            <option>IP</option>
+            <option>Action</option>
+          </select>
+        </div>
+
+        <!-- Detection Results Table -->
+        <div class="card wide">
+          <h3>Detection Results</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>User</th>
+                <th>IP</th>
+                <th>Action</th>
+                <th>Threat</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% if alerts %}
+                {% for alert in alerts %}
+                  <tr>
+                    <td>{{ alert.timestamp_detected.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ users.get(alert.log_id, 'Unknown') }}</td>
+                    <td>-</td>
+                    <td>{{ alert.type }}</td>
+                    <td class="{% if alert.severity == 'High' %}malicious{% elif alert.severity == 'Medium' %}suspicious{% else %}normal{% endif %}">
+                      {{ alert.description }}
+                    </td>
+                  </tr>
+                {% endfor %}
+              {% else %}
+                <tr>
+                  <td colspan="5">No alerts found.</td>
+                </tr>
+              {% endif %}
+            </tbody>
+          </table>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>&copy; 2025 CyberTrack — All Rights Reserved</p>
+  </footer>
+
+  <script>
+    document.querySelector('select').addEventListener('change', function () {
+      alert('Sorting logs by: ' + this.value);
+    });
+
+    document.querySelector('.logout-button').addEventListener('click', () => {
+      window.location.href = '/user/logout';
+    });
+  </script>
+
+</body>
+</html>

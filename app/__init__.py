@@ -1,27 +1,32 @@
 import os
 import click
+from dotenv import load_dotenv
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_socketio import SocketIO
 from flask.cli import with_appcontext
+from flask_migrate import Migrate
 
-# Initialize extensions
-db = SQLAlchemy()
-socketio = SocketIO()
+from app.extensions import db, socketio
+
+load_dotenv()
+
 
 def create_app():
     app = Flask(__name__)
+    app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'fallback-key')
     app.config.from_object('app.config.Config')
 
+    # initialize extensions
     db.init_app(app)
     socketio.init_app(app)
+    Migrate(app, db)
 
+    # register Blueprints
     from app.routes import log_bp
     from app.admin import admin_bp
     from app.user import user_bp
     from app.correlation import correlation_bp
-    from app.models import ThreatHash, User  # now safe
+    from app.models import ThreatHash, User
 
     app.register_blueprint(log_bp)
     app.register_blueprint(admin_bp, url_prefix='/admin')
@@ -32,8 +37,39 @@ def create_app():
     app.cli.add_command(init_db)
     app.cli.add_command(list_users)
     app.cli.add_command(seed_threats)
+    app.cli.add_command(seed_users)
 
     return app
+
+
+@click.command("seed-users")
+@with_appcontext
+def seed_users():
+    from app.models import User
+    from app.hash_utils import hash_password
+
+    db.session.query(User).delete()
+
+    users = [
+        {"username": "AnnaGrace", "password": "anna021"},
+        {"username": "NicoJohn", "password": "nico182"},
+        {"username": "PaigeFudd", "password": "paige535"},
+        {"username": "AliceGrace", "password": "alice123"},
+        {"username": "DianaTaurasi", "password": "diana938"},
+        {"username": "JonSnow", "password": "snow013"},
+        {"username": "JuanCruz", "password": "crus938juan"},
+    ]
+
+    for u in users:
+        db.session.add(User(
+            username=u["username"],
+            password=hash_password(u["password"]),
+            role="user"
+        ))
+
+    db.session.commit()
+    print("Users seeded successfully.")
+
 
 @click.command("init-db")
 @with_appcontext
@@ -65,6 +101,10 @@ def seed_threats():
         for line in f:
             h = line.strip()
             if h and h != "################################":
+                # Skip if already exists
+                if ThreatHash.query.filter_by(hash_value=h).first():
+                    continue
+
                 db.session.add(ThreatHash(
                     hash_value=h,
                     threat_level='High',
@@ -72,4 +112,4 @@ def seed_threats():
                 ))
                 count += 1
     db.session.commit()
-    click.echo(f"{count} threat hashes seeded.")
+    click.echo(f"{count} new threat hashes seeded.")
