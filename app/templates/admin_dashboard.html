@@ -8,18 +8,21 @@
 <body>
 
   <header class="header">
+  <div class="logo-title">
     <img src="{{ url_for('static', filename='images/CyberTrack.png') }}" alt="CyberTrack Logo" class="logo" onerror="this.style.display='none'" />
-    <h1 class="brand-name">Cybertrack</h1>
-    <div class="header-right">
-      <button class="logout-button">Logout</button>
-    </div>
-  </header>
+    <h1 class="brand-name">CyberTrack</h1>
+  </div>
+  <div class="header-right">
+    <button class="logout-button">Logout</button>
+  </div>
+</header>
+
 
   <main class="container">
     <section class="module">
       <h2>Cybersecurity Incident Detection</h2>
 
-      <div style="font-size: 14px; color: gray; margin-bottom: 10px;">
+      <div style="font-size: 14px; color: white; margin-bottom: 20px; line-height: 1.5;">
         Logged in as: {{ session.username }} (Role: {{ session.role }})<br>
         Alerts Count: {{ alerts|length }}<br>
         User map keys: {{ users.keys()|list }}
@@ -48,11 +51,11 @@
         <div class="card">
           <h3>Settings</h3>
           <label>Sort Logs By</label>
-          <select>
-            <option>Timestamp</option>
-            <option>User ID</option>
-            <option>IP</option>
-            <option>Action</option>
+          <select id="sortSelect">
+            <option value="timestamp">Timestamp</option>
+            <option value="user">User ID</option>
+            <option value="ip">IP</option>
+            <option value="action">Action</option>
           </select>
         </div>
 
@@ -74,8 +77,31 @@
                 {% for alert in alerts %}
                   <tr>
                     <td>{{ alert.timestamp_detected.strftime('%Y-%m-%d %H:%M:%S') }}</td>
-                    <td>{{ users.get(alert.log_id, 'Unknown') }}</td>
-                    <td>-</td>
+
+                    <!-- USER fallback -->
+                    <td>
+                      {% if users.get(alert.log_id) %}
+                        {{ users[alert.log_id] }}
+                      {% elif "User:" in alert.description %}
+                        {{ alert.description.split("User:")[-1].split(")")[0].strip() }}
+                      {% elif "User '" in alert.description %}
+                        {{ alert.description.split("User '")[-1].split("'")[0].strip() }}
+                      {% else %}
+                        Unknown
+                      {% endif %}
+                    </td>
+
+                    <!-- IP fallback -->
+                    <td>
+                      {% if alert.ip_address %}
+                        {{ alert.ip_address }}
+                      {% elif "IP:" in alert.description %}
+                        {{ alert.description.split("IP:")[-1].split(")")[0].strip() }}
+                      {% else %}
+                        Unknown
+                      {% endif %}
+                    </td>
+
                     <td>{{ alert.type }}</td>
                     <td class="{% if alert.severity == 'High' %}malicious{% elif alert.severity == 'Medium' %}suspicious{% else %}normal{% endif %}">
                       {{ alert.description }}
@@ -100,12 +126,39 @@
   </footer>
 
   <script>
-    document.querySelector('select').addEventListener('change', function () {
-      alert('Sorting logs by: ' + this.value);
-    });
-
     document.querySelector('.logout-button').addEventListener('click', () => {
       window.location.href = '/user/logout';
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', function () {
+      const sortBy = this.value;
+      const table = document.querySelector('table');
+      const tbody = table.querySelector('tbody');
+      const rows = Array.from(tbody.querySelectorAll('tr')).filter(row => row.cells.length === 5);
+
+      const getValue = (row) => {
+        switch (sortBy) {
+          case 'timestamp':
+            return new Date(row.cells[0].innerText.trim());
+          case 'user':
+            return row.cells[1].innerText.toLowerCase().trim();
+          case 'ip':
+            return row.cells[2].innerText.trim();
+          case 'action':
+            return row.cells[3].innerText.toLowerCase().trim();
+          default:
+            return '';
+        }
+      };
+
+      rows.sort((a, b) => {
+        const valA = getValue(a);
+        const valB = getValue(b);
+        if (valA instanceof Date) return valB - valA;
+        return valA.localeCompare(valB);
+      });
+
+      rows.forEach(row => tbody.appendChild(row));
     });
   </script>
 

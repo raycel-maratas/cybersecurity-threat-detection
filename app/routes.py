@@ -92,18 +92,22 @@ def upload_log():
         logs = parse_log_file(content)
 
         for log in logs:
+            print("Parsed log entry:", log)
+
+            hash_match = is_malware_hash(log.get('hash'))
+            print("Hash match result:", hash_match, "| Hash:", log.get('hash'))
+
+            anomaly = is_anomaly(log.get('user', ''), [u.username for u in User.query.all()])
+            print("Anomaly result:", anomaly, "| User:", log.get('user'))
+
             new_entry = Log(
                 filename=file.filename,
                 content=log['message'],
                 timestamp_uploaded=datetime.strptime(log['timestamp'], "%Y-%m-%d %H:%M:%S"),
-                uploaded_by=session.get('user_id')  # ← Make sure this is dynamic
+                uploaded_by=session.get('user_id')
             )
             db.session.add(new_entry)
             db.session.flush()
-
-            # Evaluate for threats
-            hash_match = is_malware_hash(log.get('hash'))
-            anomaly = is_anomaly(log.get('user', ''), [u.username for u in User.query.all()])
 
             alert = evaluate_threat(
                 log_id=new_entry.id,
@@ -112,6 +116,8 @@ def upload_log():
                 hash_match=hash_match,
                 anomaly=anomaly
             )
+
+            print("Generated alert:", alert)
 
             if alert:
                 db.session.add(alert)
@@ -128,31 +134,10 @@ def upload_log():
 
     except Exception as e:
         print("Exception occurred in /upload-log route:")
+        import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
-# Get all logs
-@log_bp.route('/logs', methods=['GET'])
-def get_logs():
-    sort_by = request.args.get('sort_by', 'timestamp_uploaded')
-    order = request.args.get('order', 'desc')
-
-    valid_sort_fields = {'id', 'filename', 'timestamp_uploaded', 'uploaded_by'}
-    if sort_by not in valid_sort_fields:
-        return jsonify({'error': f'Invalid sort_by field. Must be one of: {valid_sort_fields}'}), 400
-
-    sort_attr = getattr(Log, sort_by)
-    entries = Log.query.order_by(sort_attr.asc() if order == 'asc' else sort_attr.desc()).all()
-
-    return jsonify([
-        {
-            'id': e.id,
-            'filename': e.filename,
-            'content': e.content,
-            'timestamp_uploaded': e.timestamp_uploaded.isoformat(),
-            'uploaded_by': e.uploaded_by
-        } for e in entries
-    ])
 
 # Get a specific log
 @log_bp.route('/log/<int:log_id>', methods=['GET'])

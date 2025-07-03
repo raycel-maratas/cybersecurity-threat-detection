@@ -85,7 +85,8 @@ def login():
                 type="Login Anomaly",
                 description=f"User '{username}' account locked after 3 failed login attempts.",
                 severity="High",
-                timestamp_detected=datetime.utcnow()
+                timestamp_detected=datetime.utcnow(),
+                ip_address = request.remote_addr
             )
             db.session.add(alert)
 
@@ -148,3 +149,34 @@ def get_current_user():
         "username": session.get("username"),
         "role": session.get("role")
     })
+
+from flask import render_template  # Make sure this is imported
+
+@user_bp.route('/user-page', methods=['GET'])
+@login_required
+def user_page():
+    sort_by = request.args.get('sort_by', 'timestamp')
+    username = session.get('username')
+
+    # Map sort_by to actual SQLAlchemy columns
+    sort_options = {
+        'severity': Alert.severity.desc(),
+        'timestamp': Alert.timestamp_detected.desc(),
+        'username': Alert.log_id,  # or any username-linked field
+        'action': Alert.type
+    }
+    sort_column = sort_options.get(sort_by, Alert.timestamp_detected.desc())
+
+    # Fetch sorted alerts
+    alerts = Alert.query.order_by(sort_column).all()
+
+    # Fetch user's failed login attempts (always by timestamp)
+    failed_logins = FailedLoginAttempt.query.filter_by(username=username).order_by(FailedLoginAttempt.timestamp.desc()).all()
+
+    # Build user ID → username mapping for display
+    users = {u.id: u.username for u in User.query.all()}
+
+    return render_template('user.html', alerts=alerts, failed_logins=failed_logins, users=users)
+
+from flask import render_template
+

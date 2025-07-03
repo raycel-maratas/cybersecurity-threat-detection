@@ -11,9 +11,11 @@ def evaluate_threat(log_id=None, username=None, ip_address=None, hash_match=Fals
             alert = Alert(
                 log_id=log_id,
                 type=rule['type'],
-                description=rule['description'] + f" (User: {username}, IP: {ip_address})",
+                description=rule['description'] + f" (User: {username})",
                 severity=rule['severity'],
-                timestamp_detected=datetime.utcnow()
+                timestamp_detected=datetime.utcnow(),
+                ip_address=ip_address
             )
-            return alert  # return alert instance (not committed yet)
+            return alert
     return None
+

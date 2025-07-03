@@ -38,6 +38,7 @@ class Alert(db.Model):
     description = db.Column(db.Text)
     timestamp_detected = db.Column(db.DateTime, default=datetime.utcnow)
     severity = db.Column(db.String(20), default="Medium")
+    ip_address = db.Column(db.String(45), nullable=True)
 
 
 class ThreatHash(db.Model):

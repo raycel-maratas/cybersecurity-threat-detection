@@ -44,6 +44,34 @@ header {
   font-family: Arial;
 }
 
+.header-right {
+  margin-left: auto;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.logout-button,
+.settings-button,
+.back-button {
+  margin-left: 10px;
+  padding: 6px 12px;
+  border: none;
+  background-color: #af0000;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.logout-button:hover,
+.settings-button:hover,
+.back-button:hover {
+  background-color: #b40303;
+}
+
 /* Layout */
 .container {
   padding: 40px 60px;
@@ -74,10 +102,18 @@ header {
   box-shadow: 0 2px 12px rgba(0,0,0,0.05);
   padding: 20px;
   flex: 1 1 300px;
+  margin-bottom: 24px;
 }
 
 .card.wide {
   flex: 1 1 100%;
+}
+
+/* Card header layout */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 /* Log Feed */
@@ -92,10 +128,24 @@ header {
 }
 
 .log {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
   padding: 5px;
-  margin-bottom: 6px;
   border-radius: 4px;
 }
+
+.circle {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.red { background-color: red; }
+.yellow { background-color: yellow; }
+.green { background-color: green; }
 
 .normal {
   color: #2a9d8f;
@@ -113,7 +163,8 @@ header {
 /* Inputs & Controls */
 input[type="text"],
 input[type="number"],
-select {
+select,
+input[type="file"] {
   width: 100%;
   padding: 8px;
   margin-top: 5px;
@@ -170,6 +221,33 @@ th {
   font-weight: 500;
 }
 
+/* Settings Panel */
+.settings-panel {
+  display: none;
+  position: absolute;
+  right: 20px;
+  top: 70px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  z-index: 999;
+  width: 300px;
+}
+
+.settings-panel h4 {
+  margin-bottom: 10px;
+  font-size: 16px;
+  color: #333;
+}
+
+.settings-panel label {
+  display: block;
+  margin-top: 10px;
+  font-weight: 500;
+}
+
 /* Graph Placeholder */
 .graph-placeholder {
   background: #e0e0e0;
@@ -182,33 +260,7 @@ th {
   color: #555;
 }
 
-
-.log {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.circle {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  display: inline-block;
-}
-
-.red {
-  background-color: red;
-}
-
-.yellow {
-  background-color: yellow;
-}
-
-.green {
-  background-color: green;
-}
-
+/* Footer */
 footer {
   text-align: center;
   padding: 20px;
@@ -217,19 +269,4 @@ footer {
   font-size: 14px;
   margin-top: 40px;
   font-family: Arial;
-}
-
-.header-right {margin-left: auto; }
-
-.logout-button {
-  padding: 8px 16px;
-  background-color: #d9534f;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.logout-button:hover {
-  background-color: #c9302c;
 }
