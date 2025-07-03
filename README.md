@@ -97,10 +97,11 @@ flask db migrate
 flask db upgrade
 ```
 
-### 6. Seed Default Users
+### 6. Seed Default Users and ThreatHash Table
 
 ```bash
 flask seed-users
+flask seed-threats
 ```
 
 ### 7. Run the Application
