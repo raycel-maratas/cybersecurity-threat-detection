@@ -66,7 +66,7 @@ flask seed-threats
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/yourusername/cybertrack-threat-detection.git
+git clone https://github.com/raycel-maratas/cybersecurity-threat-detection.git
 ```
 
 ### 2. Create and Activate a Virtual Environment
