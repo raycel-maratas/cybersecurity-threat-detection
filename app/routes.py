@@ -12,7 +12,7 @@ import traceback
 
 log_bp = Blueprint('log', __name__)
 
-# Render the homepage (admin/user dashboard)
+# render the homepage (admin/user dashboard)
 @log_bp.route('/')
 def home():
     if 'user_id' not in session:
@@ -26,7 +26,7 @@ def home():
         return redirect(url_for('log.login_page'))
 
     if current_user.role == 'admin':
-        # Admin sees all logs and alerts
+        # admin sees all logs and alerts
         alerts = Alert.query.order_by(Alert.timestamp_detected.desc()).all()
         logs = Log.query.all()
 
@@ -35,15 +35,15 @@ def home():
 
         return render_template('admin_dashboard.html', alerts=alerts, users=users)
     else:
-        # User sees only their logs and alerts
+        # user sees only their logs and alerts
         user_logs = Log.query.filter_by(uploaded_by=current_user.id).all()
         log_ids = [log.id for log in user_logs]
 
-        # Alerts linked to their logs
+        # alerts linked to their logs
         user_alerts = Alert.query.filter(Alert.log_id.in_(log_ids)) \
             .order_by(Alert.timestamp_detected.desc()).all()
 
-        # Alerts from login anomalies (not tied to logs)
+        # alerts from login anomalies
         login_alerts = Alert.query.filter(
             Alert.log_id == None,
             Alert.description.ilike(f"%{current_user.username}%")
@@ -51,10 +51,10 @@ def home():
 
         from app.models import FailedLoginAttempt
 
-        # Combine all alerts
+        # combine all alerts
         all_user_alerts = user_alerts + login_alerts
 
-        # Map alerts to user
+        # map alerts to user
         users = {
             alert.log_id: current_user.username for alert in user_alerts if alert.log_id is not None
         }
@@ -80,7 +80,7 @@ def upload_page():
 def user_page():
     return render_template('user.html')
 
-# Upload and process log file
+# upload and process log file
 @log_bp.route('/upload-log', methods=['POST'])
 def upload_log():
     try:
@@ -139,7 +139,7 @@ def upload_log():
         return jsonify({'error': 'Internal server error', 'details': str(e)}), 500
 
 
-# Get a specific log
+# get a specific log
 @log_bp.route('/log/<int:log_id>', methods=['GET'])
 def get_log(log_id):
     entry = Log.query.get(log_id)
@@ -154,7 +154,7 @@ def get_log(log_id):
         'uploaded_by': entry.uploaded_by
     })
 
-# Get all alerts
+# get all alerts
 @log_bp.route('/alerts', methods=['GET'])
 def get_alerts():
     sort_by = request.args.get('sort_by', 'timestamp_detected')
@@ -178,7 +178,7 @@ def get_alerts():
         } for alert in alerts
     ])
 
-# Anomaly detection for username
+# anomaly detection for username
 @log_bp.route('/check-user', methods=['POST'])
 def check_user():
     data = request.get_json()
@@ -191,7 +191,7 @@ def check_user():
 
     return jsonify({'status': 'normal', 'message': f'Known user: {username}'}), 200
 
-# Admin-only dashboard
+# admin dashboard
 @log_bp.route('/admin-dashboard')
 def admin_dashboard():
     from app.models import Log, Alert, FailedLoginAttempt

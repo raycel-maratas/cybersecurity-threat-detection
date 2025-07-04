@@ -114,7 +114,7 @@ def login():
     session['role'] = user.role
 
     user.failed_attempts = 0
-    db.session.commit()  # ✅ Make sure all alerts and reset are saved
+    db.session.commit()
 
     print(f"Login successful for {username}")
     return jsonify({
@@ -150,7 +150,6 @@ def get_current_user():
         "role": session.get("role")
     })
 
-from flask import render_template  # Make sure this is imported
 
 @user_bp.route('/user-page', methods=['GET'])
 @login_required
@@ -158,22 +157,21 @@ def user_page():
     sort_by = request.args.get('sort_by', 'timestamp')
     username = session.get('username')
 
-    # Map sort_by to actual SQLAlchemy columns
+    # map sort_by to actual SQLAlchemy columns
     sort_options = {
         'severity': Alert.severity.desc(),
         'timestamp': Alert.timestamp_detected.desc(),
-        'username': Alert.log_id,  # or any username-linked field
+        'username': Alert.log_id,
         'action': Alert.type
     }
     sort_column = sort_options.get(sort_by, Alert.timestamp_detected.desc())
 
-    # Fetch sorted alerts
+    # fetch sorted alerts
     alerts = Alert.query.order_by(sort_column).all()
 
-    # Fetch user's failed login attempts (always by timestamp)
+    # fetch user's failed login attempts by timestamp
     failed_logins = FailedLoginAttempt.query.filter_by(username=username).order_by(FailedLoginAttempt.timestamp.desc()).all()
 
-    # Build user ID → username mapping for display
     users = {u.id: u.username for u in User.query.all()}
 
     return render_template('user.html', alerts=alerts, failed_logins=failed_logins, users=users)
