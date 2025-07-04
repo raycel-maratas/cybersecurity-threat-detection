@@ -37,6 +37,12 @@ header {
   margin-right: 15px;
 }
 
+.logo-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .brand-name {
   font-size: 24px;
   font-weight: bold;
