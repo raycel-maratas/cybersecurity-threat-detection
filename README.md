@@ -5,6 +5,9 @@ CyberTrack is a Flask-based cybersecurity threat detection system that processes
 ---
 
 ## Screenshots
+
+<img width="1419" height="803" alt="Screenshot 2025-09-27 at 16 49 41" src="https://github.com/user-attachments/assets/73b86343-99ff-40cc-8a0c-6cb02e8940d2" />
+
 <img width="1420" height="745" alt="Screenshot 2025-09-27 at 16 50 54" src="https://github.com/user-attachments/assets/863e60a0-6ac6-4974-a60b-0373a3f462b0" />
 
 <img width="1418" height="801" alt="Screenshot 2025-09-27 at 16 54 28" src="https://github.com/user-attachments/assets/6947ec01-2cc3-4ac8-8174-5e493106670a" />
